@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import StatusBadge from '../shared/StatusBadge.jsx'
 import ProgressBar from '../shared/ProgressBar.jsx'
 import LoadingSpinner from '../shared/LoadingSpinner.jsx'
-import { startCampaign } from '../../api/campaigns.js'
+import { startCampaign, deleteCampaign } from '../../api/campaigns.js'
 
 export default function CampaignCard({ campaign }) {
   const navigate = useNavigate()
@@ -18,6 +18,21 @@ export default function CampaignCard({ campaign }) {
     },
     onError: (err) => toast.error(err.message),
   })
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteCampaign(campaign._id),
+    onSuccess: () => {
+      toast.success('Campaign deleted successfully')
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] })
+    },
+    onError: (err) => toast.error(err.message),
+  })
+
+  const handleDelete = () => {
+    if (window.confirm(`Are you sure you want to delete "${campaign.name}"?`)) {
+      deleteMutation.mutate()
+    }
+  }
 
   const sentPct = campaign.totalCount > 0
     ? Math.round(((campaign.sentCount + campaign.failedCount) / campaign.totalCount) * 100)
@@ -59,13 +74,27 @@ export default function CampaignCard({ campaign }) {
           View Details
         </button>
         {campaign.status === 'draft' && (
-          <button
-            onClick={() => startMutation.mutate()}
-            disabled={startMutation.isPending}
-            className="btn-success flex-1 justify-center"
-          >
-            {startMutation.isPending ? <><LoadingSpinner size="sm" /> Starting...</> : '▶ Start'}
-          </button>
+          <>
+            <button
+              onClick={() => startMutation.mutate()}
+              disabled={startMutation.isPending}
+              className="btn-success flex-1 justify-center"
+            >
+              {startMutation.isPending ? <><LoadingSpinner size="sm" /> Starting...</> : '▶ Start'}
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+              className="btn-danger px-3"
+              title="Delete campaign"
+            >
+              {deleteMutation.isPending ? <LoadingSpinner size="sm" /> : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              )}
+            </button>
+          </>
         )}
       </div>
     </div>

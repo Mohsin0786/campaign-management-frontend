@@ -14,3 +14,6 @@ export const startCampaign = (id) =>
 
 export const getCampaignAnalytics = (id) =>
   api.get(`/api/campaigns/${id}/analytics`)
+
+export const deleteCampaign = (id) =>
+  api.delete(`/api/campaigns/${id}`)
