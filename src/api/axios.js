@@ -1,7 +1,11 @@
 import axios from 'axios'
 
+// Debug: Log the base URL being used
+const baseURL = import.meta.env.VITE_API_BASE_URL || ''
+console.log('API Base URL:', baseURL || '(empty - using relative URLs)')
+
 const api = axios.create({
-  baseURL: '',
+  baseURL,
   headers: { 'Content-Type': 'application/json' },
 })
 
